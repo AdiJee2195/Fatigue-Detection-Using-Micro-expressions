@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  /* Respect users who prefer reduced motion: this is a monitoring UI, and
+     continuous animation is exactly what they are asking us not to do. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  :focus-visible {
+    outline: 2px solid #38bdf8;
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .panel {
+    @apply rounded-lg border border-slate-800 bg-slate-900/60 p-4;
+  }
+
+  .panel-title {
+    @apply mb-3 flex items-center justify-between gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400;
+  }
+
+  .metric-label {
+    @apply text-xs uppercase tracking-wide text-slate-400;
+  }
+
+  .metric-value {
+    @apply font-mono text-lg text-slate-100;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide;
+  }
+}

@@ -1,0 +1,45 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: fatigue-detect-gateway
+
+# --- Vision service (frame -> telemetry). One blocking-free HTTP call per frame. ---
+vision:
+  service:
+    url: ${VISION_SERVICE_URL:http://localhost:8000}
+    timeout-seconds: 2
+
+# --- Narrative XAI service. Stateful WebSocket: one long-lived connection per session. ---
+# NOTE: there must be only ONE top-level `narrative:` key in this file.
+# A duplicate key makes Spring Boot fail to parse this document at startup.
+narrative:
+  service:
+    ws-url: ${NARRATIVE_WS_URL:ws://localhost:8100}
+    reconnect-seconds: 3
+    send-buffer: 64
+
+gateway:
+  # Max consecutive drops before we log a WARN instead of DEBUG
+  backpressure:
+    warn-after-drops: ${GATEWAY_WARN_AFTER_DROPS:50}
+  # Browser origins allowed to open the WebSocket. Comma separated. Restrict in production.
+  allowed-origins: ${GATEWAY_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
+  # Reject oversized frames instead of buffering them (base64 JPEG)
+  max-frame-bytes: ${GATEWAY_MAX_FRAME_BYTES:524288}
+  # Interval for the periodic per-session metrics summary log line (seconds)
+  metrics-interval-seconds: ${GATEWAY_METRICS_INTERVAL:5}
+  # Concurrency ceiling. Each session reserves a WebSocket text buffer of
+  # max-frame-bytes + envelope + container headroom (~576 KiB by default), and the
+  # per-session maps are unbounded, so without a ceiling the memory one client can
+  # pin is a function of how many sockets it opens. A refused connection is closed
+  # with 1013 and a reason rather than being allowed to degrade the process.
+  # 32 is generous for a single-operator console and small enough to reason about.
+  max-sessions: ${GATEWAY_MAX_SESSIONS:32}
+  # How long an incumbent session must be silent before a second connection may
+  # claim its id. A sessionId is in the URL, so it is public; refusing duplicates
+  # is what stops one client evicting another. The grace window exists because a
+  # socket left behind by a dropped network is indistinguishable from an active
+  # one until it stops sending, and reconnection has to keep working.
+  session-takeover-grace-ms: ${GATEWAY_SESSION_TAKEOVER_GRACE_MS:5000}

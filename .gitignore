@@ -1,0 +1,45 @@
+# ---- secrets / local configuration ----
+.env
+.env.local
+.env.*.local
+
+# ---- Java / Maven ----
+target/
+!.mvn/wrapper/maven-wrapper.jar
+*.class
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ---- Node / frontend ----
+node_modules/
+frontend/dist/
+frontend/.vite/
+*.tsbuildinfo
+npm-debug.log*
+yarn-error.log*
+
+# ---- ML artefacts ----
+# Model weights are large and are not part of the repository; mount them at run time.
+*.onnx
+*.onnx.data
+models/
+xai_narrative/models/
+
+# ---- generated eval output ----
+xai_narrative/eval/out/
+
+# ---- OS / editor noise ----
+.DS_Store
+._*
+Thumbs.db
+*.swp
+.idea/
+*.iml

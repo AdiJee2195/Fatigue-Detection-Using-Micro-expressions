@@ -1,0 +1,74 @@
+{
+  "window_s": 10.0,
+  "assess_every_s": 2.0,
+  "history_s": 300.0,
+  "trend_s": 180.0,
+  "p_ema_tau_s": 5.0,
+  "gap_reset_s": 1.0,
+  "downgrade_hold": 5,
+  "ear_closed_abs": 0.2,
+  "ear_closed_rel": 0.75,
+  "blink_max_s": 0.5,
+  "long_closure_s": [
+    0.5,
+    1.0
+  ],
+  "perclos": [
+    0.15,
+    0.3
+  ],
+  "perclos_window_s": 30.0,
+  "perclos_min_s": 15.0,
+  "p_micro_mean": [
+    0.35,
+    0.6
+  ],
+  "lid_droop_ratio": [
+    0.88,
+    0.8
+  ],
+  "stare_var_ratio": [
+    0.6,
+    0.4
+  ],
+  "low_blink_rate": 8.0,
+  "high_blink_rate": 30.0,
+  "blink_horizon_s": 30.0,
+  "blink_min_observed_s": 15.0,
+  "au4_mean": [
+    1.2,
+    2.2
+  ],
+  "au7_mean": [
+    1.2,
+    2.2
+  ],
+  "au_sustained_frac": 0.6,
+  "yawn_p": 0.6,
+  "yawn_au": 3.0,
+  "yawn_min_s": 1.0,
+  "yawn_merge_gap_s": 0.6,
+  "yawn_counts": [
+    1,
+    2,
+    3
+  ],
+  "trend_slope": 0.1,
+  "trend_min_span_s": 30.0,
+  "level_p": [
+    0.35,
+    0.6,
+    0.85
+  ],
+  "min_face_ratio": 0.7,
+  "min_illumination": 0.12,
+  "baseline_s": 60.0,
+  "baseline_p_max": 0.3,
+  "actions": {
+    "LOW": "No action required.",
+    "MODERATE": "Monitor closely and plan a rest stop soon.",
+    "HIGH": "Advise the operator to take a break at the next safe opportunity.",
+    "CRITICAL": "Immediate alert: the operator should stop at the nearest safe location.",
+    "UNKNOWN": "Check camera position and lighting."
+  }
+}
