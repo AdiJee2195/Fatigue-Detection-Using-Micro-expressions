@@ -1,0 +1,94 @@
+# Full pipeline. Start with:  docker compose up --build
+#
+# Defaults are deliberately CPU-only and LLM-free: the stack comes up and produces
+# narrative events from the deterministic template (source: "template") with no GPU
+# and no model download. Add --profile llm for Ollama-backed narratives.
+#
+# Open the dashboard at http://localhost:5173 after `up`. It runs in demo mode
+# (synthetic telemetry, clearly labelled) and needs no camera.
+services:
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # Baked into the bundle at build time. The browser connects to the gateway
+        # DIRECTLY, so this must be an address the browser can reach — not the
+        # compose-internal service name.
+        VITE_GATEWAY_WS: ${VITE_GATEWAY_WS:-ws://localhost:8080}
+    ports: ["5173:8080"]
+    depends_on:
+      gateway:
+        condition: service_started
+
+  vision:
+    build:
+      context: .
+      dockerfile: vision_service/Dockerfile
+    ports: ["8000:8000"]
+    environment:
+      VISION_MODE: stub            # switch to onnx after mounting a model
+      XAI_NARRATIVE_PATH: /app/xai_narrative
+    # For real inference: set VISION_MODE=onnx, FATIGUE_ONNX to a mounted path, and
+    # mount the directory holding the .onnx + .onnx.data pair under /models.
+    # volumes: ["./models:/models:ro"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  narrative-xai:
+    build: ./xai_narrative
+    ports: ["8100:8100"]
+    environment:
+      NARRATIVE_LLM: none           # set to ollama (with --profile llm) for LLM-authored prose
+      OLLAMA_URL: http://ollama:11434
+      OLLAMA_MODEL: llama3.1:8b
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://localhost:8100/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  gateway:
+    build:
+      context: ./gateway
+    ports: ["8080:8080"]
+    environment:
+      VISION_SERVICE_URL: http://vision:8000
+      NARRATIVE_WS_URL: ws://narrative-xai:8100
+      # Both the nginx-served dashboard (:5173) and the Vite dev server (:3000 here)
+      # must be listed, or the gateway rejects the WebSocket handshake.
+      GATEWAY_ALLOWED_ORIGINS: http://localhost:5173,http://localhost:3000
+      GATEWAY_METRICS_INTERVAL: "5"
+      GATEWAY_MAX_FRAME_BYTES: ${GATEWAY_MAX_FRAME_BYTES:-524288}
+      # Reclaims a session whose client has gone away. An active session sends 15
+      # frames a second, so any I/O resets this; only an abandoned tab reaches it.
+      GATEWAY_SESSION_IDLE_TIMEOUT_MS: ${GATEWAY_SESSION_IDLE_TIMEOUT_MS:-900000}
+    depends_on:
+      vision:
+        condition: service_started
+      narrative-xai:
+        condition: service_started
+    healthcheck:
+      # curl, not wget: the eclipse-temurin base image ships neither, and the
+      # gateway image installs curl deliberately so this check works.
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 25s
+
+  # Optional LLM backend: docker compose --profile llm up --build
+  # First run needs a model:  docker compose exec ollama ollama pull llama3.1:8b
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["llm"]
+    ports: ["11434:11434"]
+    volumes: ["ollama:/root/.ollama"]
+    # GPU (optional):
+    # deploy: {resources: {reservations: {devices: [{driver: nvidia, count: all, capabilities: [gpu]}]}}}
+
+volumes:
+  ollama:

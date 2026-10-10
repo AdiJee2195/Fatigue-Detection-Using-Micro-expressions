@@ -1,0 +1,15 @@
+# Vision service dependencies.
+# The stub mode (VISION_MODE=stub, the default) needs only fastapi/uvicorn/pydantic.
+fastapi>=0.110
+uvicorn>=0.27
+pydantic>=2.5
+numpy>=1.26
+
+# Required for VISION_MODE=onnx: image decode, face crop, model inference.
+pillow>=10
+onnxruntime>=1.17
+opencv-python-headless>=4.9
+
+# Optional: better face detection than the Haar cascade. If absent, the pipeline
+# silently falls back to OpenCV, then to a centre crop reported as "no face".
+# mediapipe>=0.10

@@ -1,0 +1,11 @@
+fastapi>=0.110
+uvicorn>=0.27
+pydantic>=2.5
+httpx>=0.26
+numpy>=1.26
+mcp>=1.2          # works with 1.x (FastMCP) and 2.x (MCPServer)
+websockets>=12    # only for the demo client / tests
+pytest>=8
+# optional, only to run the real ONNX model through cv_adapter.OnnxFatigueModel:
+onnxruntime>=1.17
+pillow>=10
